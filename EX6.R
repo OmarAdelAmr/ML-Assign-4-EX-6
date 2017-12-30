@@ -71,7 +71,41 @@ predict_acid <- function(input_acid)
   return(acid_prediction)
 }
 
-train_model()
+# TODO: Rempve comment bellow to train model
+# train_model()
+
+# -------------------------------------------------- #
+
+# One hot encoding
+acid_alphabet <- vector()
+acid_length <- nchar(training_data[1])
+
+for(acid in training_data)
+{
+  temp <- unique(unlist(strsplit(acid, "")))
+  acid_alphabet <- unique(append(acid_alphabet, temp))
+}
+acid_alphabet <- sort(acid_alphabet)
+
+encoding_matrix <- matrix(nrow=matrix_size, ncol=acid_length*length(acid_alphabet),byrow =TRUE)
+
+for (data_sample_counter in 1:matrix_size) 
+{
+  data_sample_split <- unlist(strsplit(training_data[data_sample_counter], ""))
+  data_sample_vect <- vector()
+  data_sample_encoding = replicate(length(acid_alphabet), "0")
+  for (char in data_sample_split) 
+  {
+    temp_encoding = replicate(length(acid_alphabet), "0")
+    temp_encoding[match(char, acid_alphabet)] <- 1
+    temp_encoding <- unlist(strsplit(temp_encoding, ""))
+    data_sample_vect <- append(data_sample_vect, temp_encoding)
+  }
+  encoding_matrix[data_sample_counter, ] <- data_sample_vect
+}
+# TODO: Convert to numeric in the loop
+# encoding_matrix <- mapply(encoding_matrix, FUN=as.numeric)
+# trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=100,scaled=c(), kernel='rbfdot')
 
 # -------------------------------------------------- #
 # Kebabs
