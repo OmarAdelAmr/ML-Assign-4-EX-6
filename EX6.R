@@ -1,6 +1,10 @@
 library(kernlab)
 library(kebabs)
 
+set.seed(123)
+
+start <- Sys.time()
+
 directory <- '~/Desktop/ML-Assign-4-EX-6'
 setwd(directory)
 
@@ -48,6 +52,7 @@ train_spectrum_model <- function()
   }
   A <- as(A, "KernelMatrix")
   spectrum_trained_model <<- ksvm(A,training_labels,type="C-svc",C=100,scaled=c(), cross=10)
+  print("Spectrum Model Training Done")
 }
 
 
@@ -71,10 +76,10 @@ spectrum_model_prediction <- function(input_acid)
 }
 
 
-start <- Sys.time()
-train_spectrum_model()
-end <- Sys.time()
-print(end - start)
+# start <- Sys.time()
+# train_spectrum_model()
+# end <- Sys.time()
+# print(end - start)
 
 
 # -------------------------------------------------- #
@@ -120,14 +125,69 @@ calculate_encoded_matrix <- function()
 
 train_linear_model <- function()
 {
-  linear_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=100, kernel='vanilladot', cross=10)
+  min_error <- 100
+
+  cross_value <- 0
+  c <- 0
+
+  cross_vector <- c(10, 20, 50, 100, 200)
+  c_vector <- c(5, 10, 50, 100,  200)
+
+  for (cross_counter in cross_vector) {
+    print(paste0("Current Cross: ", cross_counter))
+    for (c_counter in c_vector) {
+      print(paste0("Current c: ", c_counter))
+        linear_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=c_counter,kernel='vanilladot',cross=cross_counter)
+        print(cross(linear_trained_model))
+        if (cross(linear_trained_model) < min_error)
+        {
+          c <- c_counter
+          cross_value <- cross_counter
+          min_error <- cross(linear_trained_model)
+        }
+    }
+  }
+
+  print(paste0("C: ", c))
+  print(paste0("Cross: ", cross_value))
+  
   print("Linear Model Training Done")
 }
 
 
 train_rbf_model <- function()
 {
-  rbf_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=50,kpar=list(sigma=0.001), kernel='rbfdot', cross=10)
+  min_error <- 100
+  
+  cross_value <- 0
+  c <- 0
+  sigma <- 0
+  
+  cross_vector <- c(10, 20, 50, 100, 200)
+  c_vector <- c(5, 10, 50, 100,  200)
+  sigma_vector <- c(0.001, 0.01, 0.1, 1, 10, 100)
+  
+  for (cross_counter in cross_vector) {
+    print(paste0("Current Cross: ", cross_counter))
+    for (c_counter in c_vector) {
+      for (sigma_counter in sigma_vector) {
+        rbf_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=c_counter,kpar=list(sigma=sigma_counter),kernel='rbfdot',cross=cross_counter)
+        print(cross(rbf_trained_model))
+        if (cross(rbf_trained_model) < min_error)
+        {
+          sigma <- sigma_counter
+          c <- c_counter
+          cross_value <- cross_counter
+          min_error <- cross(rbf_trained_model)
+        }
+      }
+    }
+  }
+  
+  # rbf_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=50,kpar=list(sigma=0.001), kernel='rbfdot', cross=10)
+  print(paste0("Sigma: ", sigma))
+  print(paste0("C: ", c))
+  print(paste0("Cross: ", cross_value))
   print("RBF Model Training Done")
 }
 
@@ -156,14 +216,26 @@ encoding_matrix <- matrix(nrow=matrix_size, ncol=acid_length*length(acid_alphabe
 calculate_encoded_matrix()
 
 # start <- Sys.time()
-# ain_linear_model()
+train_linear_model()
 # train_rbf_model()
-# end <- Sys.time()
-# print(end - start)
+
+# rbf_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=50,kpar=list(sigma=0.001), kernel='rbfdot', cross=20)
+# linear_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc", C=10, kernel='vanilladot', cross=20)
+
+
+# TODO: To be removed
+# rbf_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=10,kpar=list(sigma=0.001), kernel='rbfdot', cross=100)
+
+end <- Sys.time()
+print(end - start)
 
 # Prediction example
 
-to_predict <- "FGEKIGLSFQLADDL"
+# to_predict <- "FGEKIGLSFQLADDL"
 # linear_model_prediction(to_predict)
 # rbf_model_prediction(to_predict)
-spectrum_model_prediction(to_predict)
+# spectrum_model_prediction(to_predict)
+
+# cross(rbf_trained_model)
+
+# best rbf 0.00, 100
