@@ -216,11 +216,11 @@ encoding_matrix <- matrix(nrow=matrix_size, ncol=acid_length*length(acid_alphabe
 calculate_encoded_matrix()
 
 # start <- Sys.time()
-train_linear_model()
+# train_linear_model()
 # train_rbf_model()
 
 # rbf_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc",C=50,kpar=list(sigma=0.001), kernel='rbfdot', cross=20)
-# linear_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc", C=10, kernel='vanilladot', cross=20)
+linear_trained_model <<- ksvm(encoding_matrix,training_labels,type="C-svc", C=10, kernel='vanilladot', cross=20)
 
 
 # TODO: To be removed
@@ -231,8 +231,8 @@ print(end - start)
 
 # Prediction example
 
-# to_predict <- "FGEKIGLSFQLADDL"
-# linear_model_prediction(to_predict)
+to_predict <- "FGEKIGLSFQLADDL"
+linear_model_prediction(to_predict)
 # rbf_model_prediction(to_predict)
 # spectrum_model_prediction(to_predict)
 
